@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>星座默契 · 兩顆星靠近時</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12142A; --bg-panel: #1B1E3C; --bg-panel-2: #232752;
+    --gold: #E3B872; --rose: #C98A93; --text: #F1EDE3; --text-muted: #9498BD;
+    --line: rgba(227,184,114,0.22);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Noto Sans TC", sans-serif; min-height: 100%; overflow-x: hidden; }
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(1px 1px at 20% 30%, rgba(241,237,227,0.5), transparent), radial-gradient(1px 1px at 70% 15%, rgba(241,237,227,0.4), transparent), radial-gradient(1.5px 1.5px at 40% 70%, rgba(227,184,114,0.5), transparent), radial-gradient(1px 1px at 85% 60%, rgba(241,237,227,0.35), transparent), radial-gradient(1px 1px at 10% 85%, rgba(241,237,227,0.4), transparent), radial-gradient(1.5px 1.5px at 60% 40%, rgba(227,184,114,0.4), transparent), radial-gradient(1px 1px at 92% 88%, rgba(241,237,227,0.3), transparent); background-size: 100% 100%; }
+  .wrap { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 48px 24px 64px; }
+  header { text-align: center; margin-bottom: 40px; }
+  .eyebrow { color: var(--gold); font-size: 13px; letter-spacing: 0.04em; margin-bottom: 10px; font-family: "Noto Serif TC", serif; }
+  h1 { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: clamp(26px, 6vw, 34px); line-height: 1.4; margin: 0 0 12px; }
+  .sub { color: var(--text-muted); font-size: 15px; line-height: 1.7; max-width: 40ch; margin: 0 auto; }
+  .picker-block { margin-bottom: 28px; }
+  .picker-label { font-family: "Noto Serif TC", serif; font-size: 15px; color: var(--rose); margin-bottom: 12px; padding-left: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .sign-btn { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 12px 6px 10px; text-align: center; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease; font-family: "Noto Sans TC", sans-serif; }
+  .sign-btn .glyph { display: block; font-size: 20px; color: var(--gold); margin-bottom: 4px; font-family: "Noto Serif TC", serif; }
+  .sign-btn .name { font-size: 12.5px; color: var(--text-muted); }
+  .sign-btn:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .sign-btn.active { background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel)); border-color: var(--gold); }
+  .sign-btn.active .name { color: var(--text); }
+  .divider { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 12px; margin: 24px 0 28px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .reveal-btn { display: block; width: 100%; padding: 15px; border-radius: 10px; border: 1px solid var(--gold); background: transparent; color: var(--gold); font-family: "Noto Serif TC", serif; font-size: 16px; letter-spacing: 0.02em; cursor: pointer; transition: background 0.25s ease, color 0.25s ease; }
+  .reveal-btn:hover:not(:disabled) { background: var(--gold); color: #1A1330; }
+  .reveal-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .result { margin-top: 32px; padding: 28px 22px; border-radius: 14px; background: linear-gradient(165deg, var(--bg-panel-2), var(--bg-panel)); border: 1px solid var(--line); display: none; }
+  .result.show { display: block; animation: fadein 0.6s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .result-title { font-family: "Noto Serif TC", serif; font-size: 20px; text-align: center; margin: 0 0 4px; }
+  .result-title .conn { color: var(--text-muted); font-weight: 400; font-size: 15px; padding: 0 6px; }
+  .result-title .g { color: var(--gold); }
+  .result-title .r { color: var(--rose); }
+  .result-body { font-size: 15px; line-height: 2; color: var(--text); margin: 22px 0 0; }
+  .flavor { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13.5px; line-height: 1.9; color: var(--text-muted); }
+  .flavor p { margin: 0 0 8px; }
+  .flavor b { color: var(--rose); font-weight: 500; }
+  .score-row { margin-top: 20px; display: flex; align-items: baseline; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+  .score-row .num { color: var(--gold); font-family: "Noto Serif TC", serif; font-size: 15px; }
+  .again { display: block; margin: 18px auto 0; background: none; border: none; color: var(--text-muted); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .qa-block { margin-bottom: 8px; }
+  .q-item { margin-bottom: 22px; }
+  .q-text { font-family: "Noto Serif TC", serif; font-size: 14.5px; color: var(--rose); margin-bottom: 10px; line-height: 1.6; }
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 9px; color: var(--text-muted); padding: 11px 14px; text-align: left; font-size: 14px; font-family: "Noto Sans TC", sans-serif; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease; }
+  .opt-btn:hover { border-color: var(--gold); color: var(--text); }
+  .opt-btn.active { border-color: var(--gold); color: var(--text); background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel)); }
+  @media (max-width: 380px) { .grid { gap: 6px; } .sign-btn { padding: 10px 4px 8px; } .sign-btn .glyph { font-size: 18px; } .sign-btn .name { font-size: 11.5px; } }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">星座默契</div>
+    <h1>兩顆星靠近時<br>會發生什麼</h1>
+    <p class="sub">選你和對方的星座，看看兩個人的個性放在一起，會擦出什麼、也會卡在哪裡。</p>
+  </header>
+  <div class="picker-block">
+    <div class="picker-label">你</div>
+    <div class="grid" id="grid-a" role="group" aria-label="選擇你的星座"></div>
+  </div>
+  <div class="divider">和</div>
+  <div class="picker-block">
+    <div class="picker-label">對方</div>
+    <div class="grid" id="grid-b" role="group" aria-label="選擇對方的星座"></div>
+  </div>
+  <div class="divider">還有</div>
+  <div class="qa-block" id="qa-block">
+    <div class="q-item">
+      <div class="q-text">你們認識多久了？</div>
+      <div class="opts" data-q="stage">
+        <button type="button" class="opt-btn" data-v="new">剛開始熟悉彼此</button>
+        <button type="button" class="opt-btn" data-v="mid">有一段時間了</button>
+        <button type="button" class="opt-btn" data-v="old">很久了，像老搭檔</button>
+      </div>
+    </div>
+    <div class="q-item">
+      <div class="q-text">意見不合的時候，你們通常怎麼收尾？</div>
+      <div class="opts" data-q="conflict">
+        <button type="button" class="opt-btn" data-v="yield">總有一個人先低頭</button>
+        <button type="button" class="opt-btn" data-v="cool">各自冷靜後再說</button>
+        <button type="button" class="opt-btn" data-v="rare">很少真的吵起來</button>
+      </div>
+    </div>
+    <div class="q-item">
+      <div class="q-text">對方最讓你安心的時刻是？</div>
+      <div class="opts" data-q="comfort">
+        <button type="button" class="opt-btn" data-v="remember">他記得你說過的小事</button>
+        <button type="button" class="opt-btn" data-v="nolecture">你脆弱時他沒有急著說教</button>
+        <button type="button" class="opt-btn" data-v="beself">在他面前你不用假裝</button>
+      </div>
+    </div>
+  </div>
+  <button class="reveal-btn" id="reveal" disabled>揭曉</button>
+  <div class="result" id="result">
+    <h2 class="result-title" id="result-title"></h2>
+    <div class="result-body" id="result-body"></div>
+    <div class="flavor" id="result-flavor"></div>
+    <div class="flavor" id="result-insight"></div>
+    <div class="score-row"><span>共鳴指數</span><span class="num" id="result-score"></span></div>
+    <button class="again" id="again">換一組再看看</button>
+  </div>
+</div>
+<script>
+  const signs = [
+    { name: "牡羊座", glyph: "♈", element: "fire", flavor: "衝在最前面的人，其實怕來不及愛就被超越。" },
+    { name: "金牛座", glyph: "♉", element: "earth", flavor: "把安全感堆成城牆的人，最怕有天連城牆都保不住。" },
+    { name: "雙子座", glyph: "♊", element: "air", flavor: "話說得又快又多的人，常常只是想蓋過心裡那句沒說出口的。" },
+    { name: "巨蟹座", glyph: "♋", element: "water", flavor: "把別人都顧好的人，很少被人問一句「你好嗎」。" },
+    { name: "獅子座", glyph: "♌", element: "fire", flavor: "站在光裡的人，最怕有一天沒人記得替他鼓掌。" },
+    { name: "處女座", glyph: "♍", element: "earth", flavor: "把一切修到剛好的人，其實只是不敢面對「不夠好」的自己。" },
+    { name: "天秤座", glyph: "♎", element: "air", flavor: "誰都不想得罪的人，往往最先委屈了自己。" },
+    { name: "天蠍座", glyph: "♏", element: "water", flavor: "把心鎖得最緊的人，其實最渴望有人願意撬開它。" },
+    { name: "射手座", glyph: "♐", element: "fire", flavor: "一直往前跑的人，有時候只是不敢回頭看會不會捨不得。" },
+    { name: "摩羯座", glyph: "♑", element: "earth", flavor: "什麼都扛得住的人，從沒學過怎麼喊累。" },
+    { name: "水瓶座", glyph: "♒", element: "air", flavor: "站得離人群有點遠的人，其實一直在等一個看得懂他的人。" },
+    { name: "雙魚座", glyph: "♓", element: "water", flavor: "把別人的情緒都接住的人，自己的情緒常常沒地方放。" }
+  ];
+  const elementText = {
+    "fire-fire": "兩團火放在一起，燒得又快又亮，這段關係最不缺的是熱度——你們會一起衝動、一起興奮，把日子過得像慶典。真正的考驗，是誰願意先冷靜下來，把灰燼裡剩下的東西收好。",
+    "fire-earth": "一個往前衝，一個想把地基打穩，你們的步調常常對不上——他覺得你太急，你覺得他太慢。但耐著性子磨合下去，火能讓土地變得溫暖，土也能讓火燒得更久。",
+    "fire-air": "火遇上風，只會燒得更旺。你們很容易一拍即合，點子一個接一個，對話從不冷場。要小心的是，這股熱鬧有時只是把彼此都撐得很累，記得留一點安靜的時間給對方。",
+    "fire-water": "一邊炙熱，一邊深沉，你們很容易被對方身上自己沒有的東西吸引——他羨慕你的柔軟，你羨慕他的直接。相處久了才會發現，水能澆熄火，也能讓火不至於燒傷自己，端看你們願不願意調整力道。",
+    "earth-earth": "兩個踏實的人在一起，很容易把日子過成一種安穩的節奏——你們都懂得為將來打算，也都不輕易把承諾說出口。危險在於，太習慣穩定，反而忘了偶爾要為彼此製造一點驚喜。",
+    "earth-air": "一個想把事情落地，一個想讓思緒自由飛，你們常常在「該不該想那麼多」上意見不合。但風能讓土地不再板結，土也能讓想法真的長出東西來，只是需要多一點耐心互相翻譯。",
+    "earth-water": "這是很容易長出安全感的組合——土能承接水，水能滋養土，你們懂得替對方把生活過得穩妥。要留意的是，別讓「習慣了」取代了「還在乎」，偶爾也要說出口。",
+    "air-air": "兩個腦袋轉得飛快的人湊在一起，聊天永遠聊不完，思想上的默契很難在別處找到。比較容易忽略的是心裡真正的感受——記得偶爾停下來，問問對方，而不只是問問題本身。",
+    "air-water": "一個習慣用邏輯梳理，一個習慣用感覺體會，你們常常「不是不愛，只是說法不一樣」。學會用對方聽得懂的語言，這段關係會比你們以為的更深。",
+    "water-water": "兩片深水匯在一起，很容易在情緒上高度共鳴——一個眼神就懂，不用解釋太多。也因為太懂，容易一起沉進同一種情緒裡出不來，記得留一個人先浮上來透氣。"
+  };
+  const sameSignIntro = "跟另一個自己站在一起最微妙的地方，是你會第一次從外面看見自己——包括那些一直不願意承認的部分。";
+  const insightText = {
+    stage: { new: "你們還在讀懂彼此的階段，很多判斷其實不是誤解，只是還不夠了解。", mid: "你們已經看過對方一些沒那麼好看的樣子，這段關係正在從新鮮走向真實。", old: "你們早就過了要證明什麼的階段，剩下的是要不要繼續選擇彼此。" },
+    conflict: { yield: "你們之中，總有一個人比較捨不得先開口，這份耐性別讓它變成理所當然。", cool: "你們都習慣先把情緒收好才開口，只是別把「想通了」和「說開了」搞混。", rare: "你們很少真的吵起來，這可能是很合，也可能是有些話從來沒被逼出來過。" },
+    comfort: { remember: "他記得你隨口說過的話，這種在意，比任何情話都難得。", nolecture: "你脆弱的時候他沒有急著糾正你，只是留在原地陪著，這比很多道理有用。", beself: "在他面前你不用假裝過得很好，那種鬆一口氣的感覺，才是真正的安心。" }
+  };
+  let picked = { a: null, b: null };
+  let answers = { stage: null, conflict: null, comfort: null };
+  function renderGrid(id, key) {
+    const el = document.getElementById(id);
+    signs.forEach((s, i) => {
+      const btn = document.createElement("button");
+      btn.className = "sign-btn"; btn.type = "button";
+      btn.innerHTML = `<span class="glyph">${s.glyph}</span><span class="name">${s.name}</span>`;
+      btn.addEventListener("click", () => {
+        picked[key] = i;
+        [...el.children].forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+        updateButton();
+      });
+      el.appendChild(btn);
+    });
+  }
+  renderGrid("grid-a", "a");
+  renderGrid("grid-b", "b");
+  document.querySelectorAll(".opts").forEach(group => {
+    const q = group.dataset.q;
+    group.querySelectorAll(".opt-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        answers[q] = btn.dataset.v;
+        group.querySelectorAll(".opt-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        updateButton();
+      });
+    });
+  });
+  function updateButton() {
+    const answered = answers.stage && answers.conflict && answers.comfort;
+    document.getElementById("reveal").disabled = picked.a === null || picked.b === null || !answered;
+  }
+  function elementPairKey(e1, e2) { return [e1, e2].sort().join("-"); }
+  function score(i, j) { return ((i + 1) * (j + 1) * 7 + i * 3 + j * 5) % 37 + 62; }
+  document.getElementById("reveal").addEventListener("click", () => {
+    const i = picked.a, j = picked.b;
+    const s1 = signs[i], s2 = signs[j];
+    const title = document.getElementById("result-title");
+    const body = document.getElementById("result-body");
+    const flavorBox = document.getElementById("result-flavor");
+    const scoreBox = document.getElementById("result-score");
+    title.innerHTML = `<span class="g">${s1.name}</span><span class="conn">遇上</span><span class="r">${s2.name}</span>`;
+    if (i === j) {
+      body.textContent = sameSignIntro;
+      flavorBox.innerHTML = `<p><b>${s1.name}</b>${s1.flavor.replace(/^的?/, "：")}</p>`;
+    } else {
+      const key = elementPairKey(s1.element, s2.element);
+      body.textContent = elementText[key];
+      flavorBox.innerHTML = `<p><b>${s1.name}</b>：${s1.flavor}</p><p><b>${s2.name}</b>：${s2.flavor}</p>`;
+    }
+    const insightBox = document.getElementById("result-insight");
+    insightBox.innerHTML = `<p style="color:var(--gold)">・你們的相處</p>` + `<p>${insightText.stage[answers.stage]}</p>` + `<p>${insightText.conflict[answers.conflict]}</p>` + `<p>${insightText.comfort[answers.comfort]}</p>`;
+    const bonusMap = { yield: 1, cool: 2, rare: 3, new: 0, mid: 2, old: 4, remember: 2, nolecture: 3, beself: 4 };
+    const bonus = (bonusMap[answers.stage] || 0) + (bonusMap[answers.conflict] || 0) + (bonusMap[answers.comfort] || 0);
+    scoreBox.textContent = Math.min(99, score(i, j) + bonus) + "%";
+    const result = document.getElementById("result");
+    result.classList.add("show");
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  document.getElementById("again").addEventListener("click", () => {
+    document.getElementById("result").classList.remove("show");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  updateButton();
+</script>
+</body>
+</html>
